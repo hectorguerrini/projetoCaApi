@@ -65,7 +65,7 @@ exports.updateVenda = function(req, res) {
       res.json({ message: false, string: query, jsonRetorno: result });
     } else {
       var query2 =
-        "INSERT INTO pca_festa_venda_aluno (id_aluno,id_vendedor,valor,sexo,flag_alimento,data_venda,id_festa) VALUES ";
+        "INSERT INTO pca_festa_venda_aluno (id_aluno,id_vendedor,valor,sexo,alimento,data_venda,id_festa) VALUES ";
       query2 +=
         "(" +
         req.body.id_aluno +
@@ -95,7 +95,7 @@ exports.updateVenda = function(req, res) {
 };
 exports.updateFesta = function(req, res) {
   var query =
-    "INSERT INTO pca_festas_config (nome,id_lote,flag_alimento,flag_m_f) VALUES ";
+    "INSERT INTO pca_festas_config (nome,lote_ativo,flag_alimento,flag_sexo) VALUES ";
   query +=
     "('" +
     req.body.nome +
@@ -124,7 +124,7 @@ exports.updateFesta = function(req, res) {
     function updateComboFesta(id_festa,params){
         console.dir(params)
     var query =
-      "INSERT INTO pca_combo_lotes (id_festa,numero_lote,preco_lote) VALUES ";
+      "INSERT INTO pca_combo_lotes (id_festa,lote,valor) VALUES ";
     query +=
       "(" +
       id_festa +
@@ -169,7 +169,7 @@ exports.getListaFestas = function(req, res) {
     });
   };
   exports.getComboLotes = function(req, res) {
-    var query = "SELECT numero_lote value, preco_lote label FROM pca_combo_lotes";
+    var query = "SELECT lote value, valor label FROM pca_combo_lotes";
     query += " WHERE id_festa = " + req.body.id_festa;
     conn.query(query, function(error, result) {
       if (error) {
