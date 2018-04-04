@@ -29,6 +29,7 @@ exports.listar = function(req, res) {
     if (error) {
       console.dir(error);
     }
+    console.log(result)
     if (result.length > 0) {
       res.json({ message: true, string: query, jsonRetorno: result });
     } else {
@@ -38,18 +39,55 @@ exports.listar = function(req, res) {
 };
 
 exports.detalhes = function(req, res) {
-  var query = "SELECT id_aluno,nome FROM pca_base_alunos";
-  query += " WHERE registro = '" + req.body.registro + "'";
+  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_aluno AS venda ";
+  query += " INNER JOIN pca_base_alunos AS alunos ON alunos.id_aluno = venda.id_aluno "
+  query += " WHERE alunos.registro = '" + req.body.registro + "' AND venda.id_festa = 1";
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
+    
     if (result.length > 0) {
+      result[0].data_venda = moment(result[0].data_venda).format("LLL");
+
+      res.json({ message: false, string: query, jsonRetorno: result });
+    } else {
+      var query2 = "SELECT id_aluno,nome FROM pca_base_alunos";
+      query2 += " WHERE registro = '" + req.body.registro + "'";
+      conn.query(query2, function(error, result) {
+        if (error) {
+          console.dir(error);
+        }
+
+        if (result.length > 0) {
+          res.json({ message: true, string: query2, jsonRetorno: result });
+        } else {
+          res.json({ message: false, string: query2, jsonRetorno: [] });
+        }
+      });
+    }
+  });
+
+
+};
+exports.detalhesConvidado = function(req, res) {
+  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
+  query += " WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
+  conn.query(query, function(error, result) {
+    if (error) {
+      console.dir(error);
+    }
+    
+    if (result.length > 0) {
+      result[0].data_venda = moment(result[0].data_venda).format("LLL");
+
       res.json({ message: true, string: query, jsonRetorno: result });
     } else {
       res.json({ message: false, string: query, jsonRetorno: [] });
     }
   });
+
+
 };
 exports.updateVenda = function(req, res) {
   var query = "SELECT id_venda,data_venda FROM pca_festa_venda_aluno ";
@@ -70,6 +108,50 @@ exports.updateVenda = function(req, res) {
         "(" +
         req.body.id_aluno +
         "," +
+        req.body.id_vendedor +
+        "," +
+        req.body.valor +
+        ",'" +
+        req.body.sexo +
+        "'," +
+        req.body.flag_alimento +
+        ",now()," +
+        "1)";
+      conn.query(query2, function(error, result) {
+        if (error) {
+          console.dir(error);
+        }
+
+        if (result.affectedRows > 0) {
+          res.json({ message: true, string: query2, jsonRetorno: result });
+        } else {
+          res.json({ message: false, string: query2, jsonRetorno: [] });
+        }
+      });
+    }
+  });
+};
+exports.updateVendaConvidado = function(req, res) {
+  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
+  query += "WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
+  conn.query(query, function(error, result) {
+    if (error) {
+      console.dir(error);
+    }
+
+    if (result.length > 0) {
+      result[0].data_venda = moment(result[0].data_venda).format("LLL");
+
+      res.json({ message: false, string: query, jsonRetorno: result });
+    } else {
+      var query2 =
+        "INSERT INTO pca_festa_venda_convidado (nome,cpf,id_vendedor,valor,sexo,alimento,data_venda,id_festa) VALUES ";
+      query2 +=
+        "('" +
+        req.body.nome +
+        "','" +
+        req.body.cpf +
+        "'," +
         req.body.id_vendedor +
         "," +
         req.body.valor +

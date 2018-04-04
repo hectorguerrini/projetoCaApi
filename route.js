@@ -6,8 +6,12 @@ module.exports = function(app) {
     .post(list.listar);
   app.route('/detalhes')
     .post(list.detalhes);
+  app.route('/detalhes_convidado')
+    .post(list.detalhesConvidado);
   app.route('/update_venda')
     .post(list.updateVenda);
+  app.route('/update_venda_convidado')
+    .post(list.updateVendaConvidado);
   app.route('/update_festa')
     .post(list.updateFesta);
   app.route('/get_lista_festas')
