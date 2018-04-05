@@ -20,4 +20,6 @@ module.exports = function(app) {
     .post(list.getFesta);
   app.route('/get_lotes')
     .post(list.getComboLotes);
+  app.route('/excel')
+    .get(list.gerarExcel)
 };

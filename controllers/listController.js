@@ -1,3 +1,4 @@
+var ExcelExport = require("excel-export-es6")
 var moment = require("moment");
 moment.locale("pt-br");
 var mysql = require("mysql");
@@ -264,3 +265,65 @@ exports.getListaFestas = function(req, res) {
       }
     });
   };
+
+  exports.gerarExcel = function(req, res) {
+    var query = "select * from (select 'Aluno' tipo ,id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_aluno ";
+      query += " union all select 'Convidado' tipo, id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_convidado )a";
+    conn.query(query, function(error, result) {
+      if (error) {
+        console.dir(error);
+      }
+      if (result.length > 0) {
+        excel(result);
+        res.json({ message: true, string: query, jsonRetorno: result });
+      } else {
+        res.json({ message: false, string: query, jsonRetorno: [] });
+      }
+    });
+  };
+  function excel(result){
+    var rowsTotal =[]
+
+    result.forEach(element => {
+      var row=[]
+      row.push(element.tipo)
+      row.push(element.id_venda)
+      row.push(element.id_vendedor)
+      row.push(element.valor)
+      row.push(element.alimento)
+      row.push(element.sexo)
+      row.push(element.data)
+      rowsTotal.push(row);
+    });
+    let configuration = {
+    cols: [{
+      caption: 'Tipo',
+      type: 'string'
+    }, {
+      caption: 'id_venda',
+      type: 'number'
+    }, {
+      caption: 'id_vendedor',
+      type: 'number'
+    }, {
+      caption: 'valor',
+      type: 'number'
+    }, {
+      caption: 'alimento',
+      type: 'number'
+    }, {
+      caption: 'sexo',
+      type: 'string'
+    }, {
+      caption: 'data',
+      type: 'date'
+    }
+  ], // Array that defines each columns
+      rows: rowsTotal, // Data to be written
+      name: "Vendas"
+  };
+  
+  ExcelExport.execute(configuration,function(err, path) {
+    console.log("Path to excel file", path);
+    });
+}
