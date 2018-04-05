@@ -79,7 +79,7 @@ exports.detalhesConvidado = function(req, res) {
       console.dir(error);
     }
     
-    if (result.length > 0) {
+    if (false) {
       result[0].data_venda = moment(result[0].data_venda).format("LLL");
 
       res.json({ message: true, string: query, jsonRetorno: result });
@@ -140,7 +140,7 @@ exports.updateVendaConvidado = function(req, res) {
       console.dir(error);
     }
 
-    if (result.length > 0) {
+    if (false) {
       result[0].data_venda = moment(result[0].data_venda).format("LLL");
 
       res.json({ message: false, string: query, jsonRetorno: result });
