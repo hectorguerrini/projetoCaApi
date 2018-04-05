@@ -274,18 +274,18 @@ exports.getListaFestas = function(req, res) {
         console.dir(error);
       }
       if (result.length > 0) {
-        excel(result);
-        res.json({ message: true, string: query, jsonRetorno: result });
+        excel(result,res);
+        
       } else {
-        res.json({ message: false, string: query, jsonRetorno: [] });
+        res.json({ message: false, string: query, caminho: '' });
       }
     });
   };
-  function excel(result){
-    var rowsTotal =[]
-
+  function excel(result,res){
+    var rowsTotal =[];
+    var caminho ="";
     result.forEach(element => {
-      var row=[]
+      var row=[];
       row.push(element.tipo)
       row.push(element.id_venda)
       row.push(element.id_vendedor)
@@ -325,5 +325,7 @@ exports.getListaFestas = function(req, res) {
   
   ExcelExport.execute(configuration,function(err, path) {
     console.log("Path to excel file", path);
+    res.json({ message: true, caminho: path});
     });
+
 }
