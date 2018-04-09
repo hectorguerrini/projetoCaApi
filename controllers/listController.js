@@ -267,7 +267,10 @@ exports.getListaFestas = function(req, res) {
   };
 
   exports.gerarExcel = function(req, res) {
-    var query = "select * from (select 'Aluno' tipo ,id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_aluno ";
+    var query = "select *,case when (alimento = 1 and (valor=45 or valor=60)) or (alimento = 0 and (valor =50 or valor = 65)) then '1 lote'";
+      query+= " when (alimento = 1 and (valor=50 or valor=70)) or (alimento = 0 and (valor =55 or valor = 75)) then '2 lote'";
+      query+= " when (alimento = 1 and (valor=55 or valor=80)) or (alimento = 0 and (valor =60 or valor = 85)) then '3 lote' else ' ' end as lote ";
+      query+=" from (select 'Aluno' tipo ,id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_aluno ";
       query += " union all select 'Convidado' tipo, id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_convidado )a";
     conn.query(query, function(error, result) {
       if (error) {
@@ -293,6 +296,7 @@ exports.getListaFestas = function(req, res) {
       row.push(element.alimento)
       row.push(element.sexo)
       row.push(element.data)
+      row.push(element.lote)
       rowsTotal.push(row);
     });
     let configuration = {
@@ -317,6 +321,9 @@ exports.getListaFestas = function(req, res) {
     }, {
       caption: 'data',
       type: 'date'
+    },{
+      caption: 'lotes',
+      type: 'string'
     }
   ], // Array that defines each columns
       rows: rowsTotal, // Data to be written
