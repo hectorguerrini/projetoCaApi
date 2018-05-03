@@ -42,7 +42,7 @@ exports.listar = function(req, res) {
 exports.detalhes = function(req, res) {
   var query = "SELECT id_venda,data_venda FROM pca_festa_venda_aluno AS venda ";
   query += " INNER JOIN pca_base_alunos AS alunos ON alunos.id_aluno = venda.id_aluno "
-  query += " WHERE alunos.registro = '" + req.body.registro + "' AND venda.id_festa = 1";
+  query += " WHERE alunos.registro = '" + req.body.registro + "' AND venda.id_festa = "+req.body.id_festa+"";
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
@@ -92,7 +92,7 @@ exports.detalhesConvidado = function(req, res) {
 };
 exports.updateVenda = function(req, res) {
   var query = "SELECT id_venda,data_venda FROM pca_festa_venda_aluno ";
-  query += "WHERE id_aluno = " + req.body.id_aluno + " AND id_festa = 1";
+  query += "WHERE id_aluno = " + req.body.id_aluno + " AND id_festa = "+req.body.id_festa+"";
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
@@ -104,7 +104,7 @@ exports.updateVenda = function(req, res) {
       res.json({ message: false, string: query, jsonRetorno: result });
     } else {
       var query2 =
-        "INSERT INTO pca_festa_venda_aluno (id_aluno,id_vendedor,valor,sexo,alimento,data_venda,id_festa) VALUES ";
+        "INSERT INTO pca_festa_venda_aluno (id_aluno,id_vendedor,valor,sexo,alimento,data_venda,id_festa,lote) VALUES ";
       query2 +=
         "(" +
         req.body.id_aluno +
@@ -117,7 +117,11 @@ exports.updateVenda = function(req, res) {
         "'," +
         req.body.flag_alimento +
         ",now()," +
-        "1)";
+        req.body.id_festa +
+        "," +
+        req.body.lote +
+        ")";
+        
       conn.query(query2, function(error, result) {
         if (error) {
           console.dir(error);
@@ -146,7 +150,7 @@ exports.updateVendaConvidado = function(req, res) {
       res.json({ message: false, string: query, jsonRetorno: result });
     } else {
       var query2 =
-        "INSERT INTO pca_festa_venda_convidado (nome,cpf,id_vendedor,valor,sexo,alimento,data_venda,id_festa) VALUES ";
+        "INSERT INTO pca_festa_venda_convidado (nome,cpf,id_vendedor,valor,sexo,alimento,data_venda,id_festa,lote) VALUES ";
       query2 +=
         "('" +
         req.body.nome +
@@ -160,8 +164,10 @@ exports.updateVendaConvidado = function(req, res) {
         req.body.sexo +
         "'," +
         req.body.flag_alimento +
-        ",now()," +
-        "1)";
+        ",now()" +
+        ",1," +
+        req.body.lote +
+        ")";
       conn.query(query2, function(error, result) {
         if (error) {
           console.dir(error);
@@ -238,8 +244,8 @@ exports.getListaFestas = function(req, res) {
     });
   };
   exports.getFesta = function(req, res) {
-    var query = "SELECT * FROM pca_festas_config";
-    query += " WHERE id_festa = " + req.body.id_festa;
+    var query = "SELECT * FROM pca_festas_config WHERE id_festa = (SELECT MAX(id_festa) from pca_festas_config);";
+    //query += " WHERE id_festa = " + req.body.id_festa;
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
@@ -265,6 +271,11 @@ exports.getListaFestas = function(req, res) {
       }
     });
   };
+
+
+  
+
+
 
   exports.gerarExcel = function(req, res) {
     var query = "select *,case when (alimento = 1 and (valor=45 or valor=60)) or (alimento = 0 and (valor =50 or valor = 65)) then '1 lote'";

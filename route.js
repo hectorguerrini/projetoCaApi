@@ -22,4 +22,5 @@ module.exports = function(app) {
     .post(list.getComboLotes);
   app.route('/excel')
     .get(list.gerarExcel)
+
 };
