@@ -184,7 +184,7 @@ exports.updateVendaConvidado = function(req, res) {
 };
 exports.updateFesta = function(req, res) {
   var query =
-    "INSERT INTO pca_festas_config (nome,lote_ativo,flag_alimento,flag_sexo) VALUES ";
+    "INSERT INTO pca_festas_config (nome,lote_ativo,flag_alimento,flag_sexo,flag_camarote) VALUES ";
   query +=
     "('" +
     req.body.nome +
@@ -194,15 +194,23 @@ exports.updateFesta = function(req, res) {
     req.body.flag_alimento +
     "," +
     req.body.flag_sexo +
+    "," +
+    req.body.flag_camarote +
     ")";
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
-    var lote = JSON.parse(req.body.lotes);
+    var lotesNormal = JSON.parse(req.body.lotesNormal);
+    var lotesEspecial = req.body.flag_camarote ?JSON.parse(req.body.lotesEspecial):[];
     if (result.affectedRows > 0) {
-        for(var i = 0; i<lote.length;i++){
-            updateComboFesta(result.insertId,lote[i]);
+        for(var i = 0; i<lotesNormal.length;i++){
+            updateComboFesta(result.insertId,lotesNormal[i],'pista');
+        }
+        if(req.body.flag_camarote){
+          for(var i = 0; i<lotesEspecial.length;i++){
+            updateComboFesta(result.insertId,lotesEspecial[i],'camarote');
+          }
         }
         res.json({ message: true, string: query, jsonRetorno: result });
     } else {
@@ -210,10 +218,10 @@ exports.updateFesta = function(req, res) {
     }
   });
 };
-    function updateComboFesta(id_festa,params){
+    function updateComboFesta(id_festa,params,label){
         console.dir(params)
     var query =
-      "INSERT INTO pca_combo_lotes (id_festa,lote,valor) VALUES ";
+      "INSERT INTO pca_combo_lotes (id_festa,lote,valor,label,tipo) VALUES ";
     query +=
       "(" +
       id_festa +
@@ -221,7 +229,11 @@ exports.updateFesta = function(req, res) {
       params.value +
       "," +
       params.label.replace("R$ ","") +
-      ");";
+      ",'" +
+      label +
+      "','" +
+      params.tipo +
+      "');";
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
@@ -258,8 +270,8 @@ exports.getListaFestas = function(req, res) {
     });
   };
   exports.getComboLotes = function(req, res) {
-    var query = "SELECT lote value, valor label FROM pca_combo_lotes";
-    query += " WHERE id_festa = " + req.body.id_festa;
+    var query = "SELECT lote value, valor label,label tipo,tipo aluno FROM pca_combo_lotes ";
+    query += " WHERE id_festa = " + req.body.id_festa+" order by tipo,label";
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
