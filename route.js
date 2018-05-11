@@ -1,6 +1,7 @@
 module.exports = function(app) {
   var list = require('./controllers/listController');
 
+
   // todoList Routes
   app.route('/lista')
     .post(list.listar);
