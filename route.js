@@ -3,9 +3,11 @@ module.exports = function(app) {
 
 
   // todoList Routes
-  app.route('/lista')
+  app.route('/projetoCaApi/')
+    .get(list.home);
+  app.route('/projetoCaApi/lista')
     .post(list.listar);
-  app.route('/detalhes')
+  app.route('/projetoCaApi/detalhes')
     .post(list.detalhes);
   app.route('/detalhes_convidado')
     .post(list.detalhesConvidado);
@@ -13,13 +15,13 @@ module.exports = function(app) {
     .post(list.updateVenda);
   app.route('/update_venda_convidado')
     .post(list.updateVendaConvidado);
-  app.route('/update_festa')
+  app.route('/projetoCaApi/update_festa')
     .post(list.updateFesta);
-  app.route('/get_lista_festas')
+  app.route('/projetoCaApi/get_lista_festas')
     .post(list.getListaFestas);
-  app.route('/get_festa')
+  app.route('/projetoCaApi/get_festa')
     .post(list.getFesta);
-  app.route('/get_lotes')
+  app.route('/projetoCaApi/get_lotes')
     .post(list.getComboLotes);
   app.route('/excel')
     .get(list.gerarExcel)

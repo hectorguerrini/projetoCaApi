@@ -1,77 +1,102 @@
-var ExcelExport = require("excel-export-es6")
+var config = require('../config')
 var moment = require("moment");
-
+var sql = require('mssql')
 moment.locale("pt-br");
-var mysql = require("mysql");
-var conn = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "projetoca",
-  database: "pca"
-});
 
-conn.connect(function(err) {
+sql.connect(config,function(err) {
   if (err) {
     console.error("error connecting: " + err.stack);
     return;
-  }
-
-  console.log("connected as id " + conn.threadId);
+  } 
+  console.log("connected ");
 });
 
+
+exports.home = function (req, res) {
+    res.send('Api Work');
+};
+
+
 exports.listar = function(req, res) {
-  var query = "SELECT id_aluno,nome,registro FROM pca_ca_master";
+  var usuario = req.body.usuario ? req.body.usuario:''; 
+  var senha = req.body.senha ? req.body.senha:'';
+
+  var query = "SELECT id,nome,registro FROM pca_ca_master";
   query +=
-    " WHERE registro = '" +
-    req.body.usuario +
-    "'AND senha = '" +
-    req.body.senha +
-    "'";
+    " WHERE registro = '" + usuario + "'"
+    " AND senha = '" + senha + "'";
+
+  var conn = new sql.Request();
+  conn.query(query, function(error, result) {
+    if (error) { console.dir(error); }
+
+    if (result.recordset.length > 0) {
+      res.json({ message: true, string: query, jsonRetorno: result.recordset });
+    } else {
+      res.json({ message: false, string: query, jsonRetorno: [] });
+    }
+  });
+
+};
+
+exports.detalhes = function(req, res) {
+  var query = " EXEC sp_pca_get_aluno ";
+    query += " @REGISTRO='" + req.body.registro + "'";
+    query += " ,@ID_FESTA= " + req.body.id_festa + "";
+
+  
+  var conn = new sql.Request();
+  console.log(query)
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
-    console.log(result)
-    if (result.length > 0) {
-      res.json({ message: true, string: query, jsonRetorno: result });
+    
+    if (result.recordset.length > 0) {
+      if(result.recordset[0].data_venda){
+        result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
+
+        res.json({ message: false, string: query, jsonRetorno: result.recordset });
+      }else{
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
+      }      
+    } else {
+      res.json({ message: false, string: query, jsonRetorno: [] });
+    }
+  });
+
+};
+exports.updateVenda = function(req, res) {
+  
+  var query = " EXEC sp_pca_update_venda_aluno "; 
+  query +=" @ID_ALUNO="+req.body.id_aluno +"";
+  query +=" ,@ID_VENDEDOR="+req.body.id_vendedor +"";
+  query +=" ,@VALOR="+req.body.valor +"";
+  query +=" ,@SEXO='"+req.body.sexo +"'";
+  query +=" ,@ALIMENTO="+req.body.flag_alimento +"";
+  query +=" ,@ID_FESTA="+req.body.id_festa +"";
+  query +=" ,@LOTE="+req.body.lote +"";
+
+  var conn = new sql.Request();
+  conn.query(query, function(error, result) {
+    if (error) {
+      console.dir(error);
+    }
+
+    if (result.recordset.length > 0) {
+      if(result.recordset[0].data_venda){
+        result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
+
+        res.json({ message: false, string: query, jsonRetorno: result.recordset });
+      }else{
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
+      }
     } else {
       res.json({ message: false, string: query, jsonRetorno: [] });
     }
   });
 };
 
-exports.detalhes = function(req, res) {
-  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_aluno AS venda ";
-  query += " INNER JOIN pca_base_alunos AS alunos ON alunos.id_aluno = venda.id_aluno "
-  query += " WHERE alunos.registro = '" + req.body.registro + "' AND venda.id_festa = "+req.body.id_festa+"";
-  conn.query(query, function(error, result) {
-    if (error) {
-      console.dir(error);
-    }
-    
-    if (result.length > 0) {
-      result[0].data_venda = moment(result[0].data_venda).format("LLL");
-
-      res.json({ message: false, string: query, jsonRetorno: result });
-    } else {
-      var query2 = "SELECT id_aluno,nome FROM pca_base_alunos";
-      query2 += " WHERE registro = '" + req.body.registro + "'";
-      conn.query(query2, function(error, result) {
-        if (error) {
-          console.dir(error);
-        }
-
-        if (result.length > 0) {
-          res.json({ message: true, string: query2, jsonRetorno: result });
-        } else {
-          res.json({ message: false, string: query2, jsonRetorno: [] });
-        }
-      });
-    }
-  });
-
-
-};
 exports.detalhesConvidado = function(req, res) {
   var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
   query += " WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
@@ -91,52 +116,7 @@ exports.detalhesConvidado = function(req, res) {
 
 
 };
-exports.updateVenda = function(req, res) {
-  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_aluno ";
-  query += "WHERE id_aluno = " + req.body.id_aluno + " AND id_festa = "+req.body.id_festa+"";
-  conn.query(query, function(error, result) {
-    if (error) {
-      console.dir(error);
-    }
 
-    if (result.length > 0) {
-      result[0].data_venda = moment(result[0].data_venda).format("LLL");
-
-      res.json({ message: false, string: query, jsonRetorno: result });
-    } else {
-      var query2 =
-        "INSERT INTO pca_festa_venda_aluno (id_aluno,id_vendedor,valor,sexo,alimento,data_venda,id_festa,lote) VALUES ";
-      query2 +=
-        "(" +
-        req.body.id_aluno +
-        "," +
-        req.body.id_vendedor +
-        "," +
-        req.body.valor +
-        ",'" +
-        req.body.sexo +
-        "'," +
-        req.body.flag_alimento +
-        ",now()," +
-        req.body.id_festa +
-        "," +
-        req.body.lote +
-        ")";
-        
-      conn.query(query2, function(error, result) {
-        if (error) {
-          console.dir(error);
-        }
-
-        if (result.affectedRows > 0) {
-          res.json({ message: true, string: query2, jsonRetorno: result });
-        } else {
-          res.json({ message: false, string: query2, jsonRetorno: [] });
-        }
-      });
-    }
-  });
-};
 exports.updateVendaConvidado = function(req, res) {
   var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
   query += "WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
@@ -146,9 +126,9 @@ exports.updateVendaConvidado = function(req, res) {
     }
 
     if (false) {
-      result[0].data_venda = moment(result[0].data_venda).format("LLL");
+      result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
 
-      res.json({ message: false, string: query, jsonRetorno: result });
+      res.json({ message: false, string: query, jsonRetorno: result.recordset });
     } else {
       var query2 =
         "INSERT INTO pca_festa_venda_convidado (nome,cpf,id_vendedor,valor,sexo,alimento,data_venda,id_festa,lote) VALUES ";
@@ -165,8 +145,9 @@ exports.updateVendaConvidado = function(req, res) {
         req.body.sexo +
         "'," +
         req.body.flag_alimento +
-        ",now()" +
-        ",1," +
+        ",now()," +
+        req.body.id_festa +
+        "," +
         req.body.lote +
         ")";
       conn.query(query2, function(error, result) {
@@ -174,8 +155,8 @@ exports.updateVendaConvidado = function(req, res) {
           console.dir(error);
         }
 
-        if (result.affectedRows > 0) {
-          res.json({ message: true, string: query2, jsonRetorno: result });
+        if (result.recordset.affectedRows > 0) {
+          res.json({ message: true, string: query2, jsonRetorno: result.recordset });
         } else {
           res.json({ message: false, string: query2, jsonRetorno: [] });
         }
@@ -184,43 +165,45 @@ exports.updateVendaConvidado = function(req, res) {
   });
 };
 exports.updateFesta = function(req, res) {
-  var query =
-    "INSERT INTO pca_festas_config (nome,lote_ativo,flag_alimento,flag_sexo,flag_camarote) VALUES ";
-  query +=
-    "('" +
-    req.body.nome +
-    "'," +
-    req.body.lote +
-    "," +
-    req.body.flag_alimento +
-    "," +
-    req.body.flag_sexo +
-    "," +
-    req.body.flag_camarote +
-    ")";
+  var nome = req.body.nome ? req.body.nome : '';
+  var alimento = req.body.flag_alimento ? parseInt(req.body.flag_alimento) : 0;
+  var sexo = req.body.flag_sexo ? parseInt(req.body.flag_sexo) : 0;
+  var camarote = req.body.flag_camarote ? parseInt(req.body.flag_camarote): 0;
+
+  
+  var query = " EXEC sp_pca_update_festa ";
+  query += " @NOME='"+nome+"'"; 
+  query += " ,@ALIMENTO="+alimento+""; 
+  query += " ,@SEXO="+sexo+""; 
+  query += " ,@CAMAROTE="+camarote+""; 
+  var conn = new sql.Request();
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
+  
     var lotesNormal = JSON.parse(req.body.lotesNormal);
-    var lotesEspecial = req.body.flag_camarote ?JSON.parse(req.body.lotesEspecial):[];
-    if (result.affectedRows > 0) {
+    var lotesEspecial = camarote ?JSON.parse(req.body.lotesEspecial):[];
+
+    if (result.recordset.length > 0) {
         for(var i = 0; i<lotesNormal.length;i++){
-            updateComboFesta(result.insertId,lotesNormal[i],'pista');
+            updateComboFesta(result.recordset[0].id_festa,lotesNormal[i],'pista');
         }
-        if(req.body.flag_camarote){
+        if(camarote){
           for(var i = 0; i<lotesEspecial.length;i++){
-            updateComboFesta(result.insertId,lotesEspecial[i],'camarote');
+            updateComboFesta(result.recordset[0].id_festa,lotesEspecial[i],'camarote');
           }
         }
-        res.json({ message: true, string: query, jsonRetorno: result });
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
     } else {
         res.json({ message: false, string: query, jsonRetorno: [] });
     }
   });
 };
-    function updateComboFesta(id_festa,params,label){
-        console.dir(params)
+    
+
+
+function updateComboFesta(id_festa,params,label){
     var query =
       "INSERT INTO pca_combo_lotes (id_festa,lote,valor,label,tipo) VALUES ";
     query +=
@@ -235,50 +218,53 @@ exports.updateFesta = function(req, res) {
       "','" +
       params.tipo +
       "');";
+    var conn = new sql.Request();
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
       }
     });
-  };
+};
 
 
 exports.getListaFestas = function(req, res) {
     var query = "SELECT * FROM pca_festas_config";
+    var conn  = new sql.Request();
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
       }
-      if (result.length > 0) {
-        res.json({ message: true, string: query, jsonRetorno: result });
+      if (result.recordset.length > 0) {
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
       } else {
         res.json({ message: false, string: query, jsonRetorno: [] });
       }
     });
   };
   exports.getFesta = function(req, res) {
-    var query = "SELECT * FROM pca_festas_config WHERE id_festa = (SELECT MAX(id_festa) from pca_festas_config);";
-    //query += " WHERE id_festa = " + req.body.id_festa;
+    var query = "SELECT TOP 1 * FROM pca_festas_config ORDER BY id_festa DESC";
+    var conn = new sql.Request();
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
       }
-      if (result.length > 0) {
-        res.json({ message: true, string: query, jsonRetorno: result });
+      console.log(result)
+      if (result.recordset.length > 0) {
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
       } else {
         res.json({ message: false, string: query, jsonRetorno: [] });
       }
     });
   };
   exports.getComboLotes = function(req, res) {
-    var query = "SELECT lote value, valor label,label tipo,tipo aluno FROM pca_combo_lotes ";
-    query += " WHERE id_festa = " + req.body.id_festa+" order by tipo,label";
+    var query = "EXEC sp_pca_get_lote @ID="+req.body.id_festa+"";
+    var conn = new sql.Request()
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
       }
-      if (result.length > 0) {
-        res.json({ message: true, string: query, jsonRetorno: result });
+      if (result.recordset.length > 0) {
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
       } else {
         res.json({ message: false, string: query, jsonRetorno: [] });
       }
@@ -300,66 +286,16 @@ exports.getListaFestas = function(req, res) {
       if (error) {
         console.dir(error);
       }
-      if (result.length > 0) {
-        excel(result,res);
+      if (result.recordset.length > 0) {
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
+        
         
       } else {
         res.json({ message: false, string: query, caminho: '' });
       }
     });
   };
-  function excel(result,res){
-    var rowsTotal =[];
-    var caminho ="";
-    result.forEach(element => {
-      var row=[];
-      row.push(element.tipo)
-      row.push(element.id_venda)
-      row.push(element.id_vendedor)
-      row.push(element.valor)
-      row.push(element.alimento)
-      row.push(element.sexo)
-      row.push(element.data)
-      row.push(element.lote)
-      rowsTotal.push(row);
-    });
-    let configuration = {
-    cols: [{
-      caption: 'Tipo',
-      type: 'string'
-    }, {
-      caption: 'id_venda',
-      type: 'number'
-    }, {
-      caption: 'id_vendedor',
-      type: 'number'
-    }, {
-      caption: 'valor',
-      type: 'number'
-    }, {
-      caption: 'alimento',
-      type: 'number'
-    }, {
-      caption: 'sexo',
-      type: 'string'
-    }, {
-      caption: 'data',
-      type: 'date'
-    },{
-      caption: 'lotes',
-      type: 'string'
-    }
-  ], // Array that defines each columns
-      rows: rowsTotal, // Data to be written
-      name: "Vendas"
-  };
-  
-  ExcelExport.execute(configuration,function(err, path) {
-    console.log("Path to excel file", path);
-    res.json({ message: true, caminho: path});
-    });
 
-}
 
 
 
