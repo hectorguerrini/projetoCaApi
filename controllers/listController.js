@@ -1,5 +1,7 @@
 var config = require('../config')
 var moment = require("moment");
+var fs = require("fs");
+
 var sql = require('mssql')
 moment.locale("pt-br");
 
@@ -13,7 +15,7 @@ sql.connect(config,function(err) {
 
 
 exports.home = function (req, res) {
-    res.send('Api Work');
+  res.send('Api Work')
 };
 
 
@@ -271,29 +273,56 @@ exports.getListaFestas = function(req, res) {
     });
   };
 
-
-  
-
-
-
   exports.gerarExcel = function(req, res) {
-    var query = "select *,case when (alimento = 1 and (valor=45 or valor=60)) or (alimento = 0 and (valor =50 or valor = 65)) then '1 lote'";
-      query+= " when (alimento = 1 and (valor=50 or valor=70)) or (alimento = 0 and (valor =55 or valor = 75)) then '2 lote'";
-      query+= " when (alimento = 1 and (valor=55 or valor=80)) or (alimento = 0 and (valor =60 or valor = 85)) then '3 lote' else ' ' end as lote ";
-      query+=" from (select 'Aluno' tipo ,id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_aluno ";
-      query += " union all select 'Convidado' tipo, id_venda,id_vendedor,valor,alimento,sexo,DATE_FORMAT(data_venda, '%d/%m/%Y') data from pca_festa_venda_convidado )a";
+    var festa = req.params.id_festa!='all' ? req.params.id_festa:null;
+    var tipo = req.params.tipo!='all' ? req.params.tipo:null;
+    var query= " EXEC sp_pca_gera_excel "+"@ID_FESTA="+festa+",@TIPO="+tipo+"";
+
+    var conn = new sql.Request();
     conn.query(query, function(error, result) {
       if (error) {
         console.dir(error);
       }
+      
       if (result.recordset.length > 0) {
-        res.json({ message: true, string: query, jsonRetorno: result.recordset });
         
+        var excel = result.recordset;
+        var body = "";
+        excel.forEach(function(row){
+          body += "<tr>";
+          body += "<identificador>"+row.identificador+"</identificador>"
+          body += "<vendedor>"+row.vendedor+"</vendedor>"
+          body += "<lote>"+row.lote+"</lote>"
+          body += "<preco>"+row.preco+"</preco>"
+          body += "<data>"+moment(row.data_venda).format('MM/DD/YYYY')+"</data>"
+          body += "<alimento>"+row.alimento+"</alimento>"
+          body += "<sexo>"+row.sexo+"</sexo>"
+          body += "</tr>"
+        })
+        var html = "<?xml version='1.0' encoding='UTF-8'?>";
+        html = html+"<table><tbody>" + body + "</tbody></table>";   
+        console.log(html)
+        var save = fs.writeFile("vendas.xls", html,'utf8', err => {
+          if (err) throw err;
+          console.log("The file has been saved!");
+          
+          var path = 'C:/inetpub/wwwroot/projetoCaApi/vendas.xls';
+          res.download(path,'vendas.xls',function(err){
+            if(err){
+              console.log(err)
+            } 
+           
+            console.log('download path: '+path)
+          })
+        });
+            
         
+      
       } else {
         res.json({ message: false, string: query, caminho: '' });
       }
     });
+
   };
 
 

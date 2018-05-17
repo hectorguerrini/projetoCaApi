@@ -11,7 +11,7 @@ module.exports = function(app) {
     .post(list.detalhes);
   app.route('/detalhes_convidado')
     .post(list.detalhesConvidado);
-  app.route('/update_venda')
+  app.route('/projetoCaApi/update_venda')
     .post(list.updateVenda);
   app.route('/update_venda_convidado')
     .post(list.updateVendaConvidado);
@@ -23,7 +23,7 @@ module.exports = function(app) {
     .post(list.getFesta);
   app.route('/projetoCaApi/get_lotes')
     .post(list.getComboLotes);
-  app.route('/excel')
+  app.route('/projetoCaApi/excel/download/:id_festa/:tipo')
     .get(list.gerarExcel)
-
+ 
 };
