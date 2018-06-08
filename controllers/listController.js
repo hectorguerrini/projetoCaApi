@@ -306,7 +306,7 @@ exports.getListaFestas = function(req, res) {
           if (err) throw err;
           console.log("The file has been saved!");
 
-          var path = 'C:/inetpub/wwwroot/projetoCaApi/vendas.xls';
+          var path = 'C:/inetpub/wwwroot/vendas/vendas.xls';
           res.download(path,'vendas.xls',function(err){
             if(err){
               console.log(err)
