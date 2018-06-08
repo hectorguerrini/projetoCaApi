@@ -99,72 +99,59 @@ exports.updateVenda = function(req, res) {
   });
 };
 
-exports.detalhesConvidado = function(req, res) {
-  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
-  query += " WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
+// exports.detalhesConvidado = function(req, res) {
+//   var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
+//   query += " WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
+//   conn.query(query, function(error, result) {
+//     if (error) {
+//       console.dir(error);
+//     }
+
+//     if (false) {
+//       result[0].data_venda = moment(result[0].data_venda).format("LLL");
+
+//       res.json({ message: true, string: query, jsonRetorno: result });
+//     } else {
+//       res.json({ message: false, string: query, jsonRetorno: [] });
+//     }
+//   });
+
+
+// };
+
+exports.updateVendaConvidado = function(req, res) {
+
+  var nome = req.body.nome ? req.body.nome:'Sem nome';
+  
+  var query = " EXEC sp_pca_update_venda_convidado ";
+  query +=" @NOME='"+nome +"'";
+  query +=" ,@CPF='"+req.body.cpf +"'";
+  query +=" ,@ID_VENDEDOR="+req.body.id_vendedor +"";
+  query +=" ,@VALOR="+req.body.valor +"";
+  query +=" ,@SEXO='"+req.body.sexo +"'";
+  query +=" ,@ALIMENTO="+req.body.flag_alimento +"";
+  query +=" ,@ID_FESTA="+req.body.id_festa +"";
+  query +=" ,@LOTE="+req.body.lote +"";
+
+  var conn = new sql.Request();
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
 
-    if (false) {
-      result[0].data_venda = moment(result[0].data_venda).format("LLL");
+    if (result.recordset.length > 0) {
+      if(result.recordset[0].data_venda){
+        result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
 
-      res.json({ message: true, string: query, jsonRetorno: result });
+        res.json({ message: false, string: query, jsonRetorno: result.recordset });
+      }else{
+        res.json({ message: true, string: query, jsonRetorno: result.recordset });
+      }
     } else {
       res.json({ message: false, string: query, jsonRetorno: [] });
     }
   });
-
-
-};
-
-exports.updateVendaConvidado = function(req, res) {
-  var query = "SELECT id_venda,data_venda FROM pca_festa_venda_convidado ";
-  query += "WHERE cpf = '" + req.body.cpf + "' AND id_festa = 1";
-  conn.query(query, function(error, result) {
-    if (error) {
-      console.dir(error);
-    }
-
-    if (false) {
-      result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
-
-      res.json({ message: false, string: query, jsonRetorno: result.recordset });
-    } else {
-      var query2 =
-        "INSERT INTO pca_festa_venda_convidado (nome,cpf,id_vendedor,valor,sexo,alimento,data_venda,id_festa,lote) VALUES ";
-      query2 +=
-        "('" +
-        req.body.nome +
-        "','" +
-        req.body.cpf +
-        "'," +
-        req.body.id_vendedor +
-        "," +
-        req.body.valor +
-        ",'" +
-        req.body.sexo +
-        "'," +
-        req.body.flag_alimento +
-        ",now()," +
-        req.body.id_festa +
-        "," +
-        req.body.lote +
-        ")";
-      conn.query(query2, function(error, result) {
-        if (error) {
-          console.dir(error);
-        }
-
-        if (result.recordset.affectedRows > 0) {
-          res.json({ message: true, string: query2, jsonRetorno: result.recordset });
-        } else {
-          res.json({ message: false, string: query2, jsonRetorno: [] });
-        }
-      });
-    }
-  });
+ 
 };
 exports.updateFesta = function(req, res) {
   var nome = req.body.nome ? req.body.nome : '';
