@@ -20,7 +20,7 @@ app.use(function (req, res, next) {
 var routes = require('./route'); //importing route
 routes(app); //register the route
 
- var server = app.listen(process.env.PORT, function () {
+ var server = app.listen(process.env.PORT || 3000,  function () {
     var port = server.address().port;
     console.dir("App now running on port: "+ port);
  });

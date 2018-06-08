@@ -9,7 +9,7 @@ sql.connect(config,function(err) {
   if (err) {
     console.error("error connecting: " + err.stack);
     return;
-  } 
+  }
   console.log("connected ");
 });
 
@@ -20,7 +20,7 @@ exports.home = function (req, res) {
 
 
 exports.listar = function(req, res) {
-  var usuario = req.body.usuario ? req.body.usuario:''; 
+  var usuario = req.body.usuario ? req.body.usuario:'';
   var senha = req.body.senha ? req.body.senha:'';
 
   var query = "SELECT id,nome,registro FROM pca_ca_master";
@@ -46,14 +46,14 @@ exports.detalhes = function(req, res) {
     query += " @REGISTRO='" + req.body.registro + "'";
     query += " ,@ID_FESTA= " + req.body.id_festa + "";
 
-  
+
   var conn = new sql.Request();
   console.log(query)
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
-    
+
     if (result.recordset.length > 0) {
       if(result.recordset[0].data_venda){
         result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
@@ -61,7 +61,7 @@ exports.detalhes = function(req, res) {
         res.json({ message: false, string: query, jsonRetorno: result.recordset });
       }else{
         res.json({ message: true, string: query, jsonRetorno: result.recordset });
-      }      
+      }
     } else {
       res.json({ message: false, string: query, jsonRetorno: [] });
     }
@@ -69,8 +69,8 @@ exports.detalhes = function(req, res) {
 
 };
 exports.updateVenda = function(req, res) {
-  
-  var query = " EXEC sp_pca_update_venda_aluno "; 
+
+  var query = " EXEC sp_pca_update_venda_aluno ";
   query +=" @ID_ALUNO="+req.body.id_aluno +"";
   query +=" ,@ID_VENDEDOR="+req.body.id_vendedor +"";
   query +=" ,@VALOR="+req.body.valor +"";
@@ -106,7 +106,7 @@ exports.detalhesConvidado = function(req, res) {
     if (error) {
       console.dir(error);
     }
-    
+
     if (false) {
       result[0].data_venda = moment(result[0].data_venda).format("LLL");
 
@@ -172,18 +172,18 @@ exports.updateFesta = function(req, res) {
   var sexo = req.body.flag_sexo ? parseInt(req.body.flag_sexo) : 0;
   var camarote = req.body.flag_camarote ? parseInt(req.body.flag_camarote): 0;
 
-  
+
   var query = " EXEC sp_pca_update_festa ";
-  query += " @NOME='"+nome+"'"; 
-  query += " ,@ALIMENTO="+alimento+""; 
-  query += " ,@SEXO="+sexo+""; 
-  query += " ,@CAMAROTE="+camarote+""; 
+  query += " @NOME='"+nome+"'";
+  query += " ,@ALIMENTO="+alimento+"";
+  query += " ,@SEXO="+sexo+"";
+  query += " ,@CAMAROTE="+camarote+"";
   var conn = new sql.Request();
   conn.query(query, function(error, result) {
     if (error) {
       console.dir(error);
     }
-  
+
     var lotesNormal = JSON.parse(req.body.lotesNormal);
     var lotesEspecial = camarote ?JSON.parse(req.body.lotesEspecial):[];
 
@@ -202,7 +202,7 @@ exports.updateFesta = function(req, res) {
     }
   });
 };
-    
+
 
 
 function updateComboFesta(id_festa,params,label){
@@ -283,9 +283,9 @@ exports.getListaFestas = function(req, res) {
       if (error) {
         console.dir(error);
       }
-      
+
       if (result.recordset.length > 0) {
-        
+
         var excel = result.recordset;
         var body = "";
         excel.forEach(function(row){
@@ -300,24 +300,24 @@ exports.getListaFestas = function(req, res) {
           body += "</tr>"
         })
         var html = "<?xml version='1.0' encoding='UTF-8'?>";
-        html = html+"<table><tbody>" + body + "</tbody></table>";   
+        html = html+"<table><tbody>" + body + "</tbody></table>";
         console.log(html)
         var save = fs.writeFile("vendas.xls", html,'utf8', err => {
           if (err) throw err;
           console.log("The file has been saved!");
-          
+
           var path = 'C:/inetpub/wwwroot/projetoCaApi/vendas.xls';
           res.download(path,'vendas.xls',function(err){
             if(err){
               console.log(err)
-            } 
-           
+            }
+
             console.log('download path: '+path)
           })
         });
-            
-        
-      
+
+
+
       } else {
         res.json({ message: false, string: query, caminho: '' });
       }
