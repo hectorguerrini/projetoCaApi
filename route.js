@@ -9,8 +9,8 @@ module.exports = function(app) {
     .post(list.listar);
   app.route('/vendas/detalhes')
     .post(list.detalhes);
-  // app.route('/detalhes_convidado')
-  //   .post(list.detalhesConvidado);
+  app.route('/vendas/detalhes_convidado')
+    .post(list.detalhesConvidado);
 
   app.route('/vendas/update_venda')
     .post(list.updateVenda);
@@ -28,5 +28,6 @@ module.exports = function(app) {
     .post(list.getComboLotes);
   app.route('/vendas/excel/download/:id_festa/:tipo')
     .get(list.gerarExcel)
- 
+  app.route('/vendas/delVenda')
+    .post(list.delete)
 };
