@@ -9,11 +9,14 @@ module.exports = function(app) {
     .post(list.listar);
   app.route('/vendas/detalhes')
     .post(list.detalhes);
-  app.route('/detalhes_convidado')
-    .post(list.detalhesConvidado);
+  // app.route('/detalhes_convidado')
+  //   .post(list.detalhesConvidado);
+
   app.route('/vendas/update_venda')
     .post(list.updateVenda);
-  app.route('/update_venda_convidado')
+  app.route('/vendas/update_base_alunos')
+    .post(list.updateBaseAlunos);
+  app.route('/vendas/update_venda_convidado')
     .post(list.updateVendaConvidado);
   app.route('/vendas/update_festa')
     .post(list.updateFesta);
