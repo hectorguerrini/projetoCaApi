@@ -21,7 +21,7 @@ module.exports = function(app) {
   app.route('/vendas/update_festa')
     .post(list.updateFesta);
   
-    app.route('/vendas/get_lista')
+    app.route('/vendas/get_lista/:id')
     .get(list.getLista);
 
   app.route('/vendas/get_festa')

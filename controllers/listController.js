@@ -222,7 +222,7 @@ function updateComboFesta(id_festa, params, label) {
 
 
 exports.getLista = function (req, res) {
-  var query = `select * from pca_festa_venda_aluno where id_festa = ${req.body.id_festa}`;
+  var query = `select * from pca_festa_venda_aluno where id_festa = ${req.params.id_festa}`;
   var conn = new sql.Request();
   conn.query(query, function (error, result) {
     if (error) {
