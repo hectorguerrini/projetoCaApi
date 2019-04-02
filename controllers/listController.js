@@ -253,9 +253,7 @@ function updateComboFesta(id_festa, params, label) {
 
 exports.getLista = function (req, res) {
   var query = `
-    select id_venda,valor,alimento,combo from pca_festa_venda_aluno where id_festa = ${req.body.id_festa} and id_vendedor = ${req.body.id_vendedor}
-    union all
-    select id_venda,valor,alimento,combo from pca_festa_venda_convidado where id_festa = ${req.body.id_festa} and id_vendedor = ${req.body.id_vendedor}
+    EXEC sp_pca_get_tabela_geral @ID_FESTA = ${req.body.id_festa}
   `;
   querySql.queryDB(query, (err, result) => {
     if (err) {
