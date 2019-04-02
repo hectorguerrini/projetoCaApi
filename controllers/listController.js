@@ -2,16 +2,17 @@ var config = require('../config')
 var moment = require("moment");
 var fs = require("fs");
 var path = require('path');
-var sql = require('mssql')
+//var sql = require('mssql')
 moment.locale("pt-br");
+const querySql = require('./mssqlConfig')();
 
-sql.connect(config, function (err) {
-  if (err) {
-    console.error("error connecting: " + err.stack);
-    return;
-  }
-  console.log("connected ");
-});
+// sql.connect(config, function (err) {
+//   if (err) {
+//     console.error("error connecting: " + err.stack);
+//     return;
+//   }
+//   console.log("connected ");
+// });
 
 
 exports.home = function (req, res) {
@@ -27,16 +28,15 @@ exports.listar = function (req, res) {
   query +=
     " WHERE registro = '" + usuario + "'"
   " AND senha = '" + senha + "'";
-
-  var conn = new sql.Request();
-  conn.query(query, function (error, result) {
-    if (error) { console.dir(error); }
-
-    if (result.recordset.length > 0) {
-      res.json({ message: true, string: query, jsonRetorno: result.recordset });
-    } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
 
 };
@@ -46,26 +46,35 @@ exports.detalhes = function (req, res) {
   query += " @REGISTRO='" + req.body.registro + "'";
   query += " ,@ID_FESTA= " + req.body.id_festa + "";
 
-
-  var conn = new sql.Request();
-  console.log(query)
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
-
-    if (result.recordset.length > 0) {
-      if (result.recordset[0].data_venda) {
-        result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
-
-        res.json({ message: false, string: query, jsonRetorno: result.recordset });
-      } else {
-        res.json({ message: true, string: query, jsonRetorno: result.recordset });
-      }
-    } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
-    }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
+  // var conn = new sql.Request();
+  // console.log(query)
+  // conn.query(query, function (error, result) {
+  //   if (error) {
+  //     console.dir(error);
+  //   }
+
+  //   if (result.recordset.length > 0) {
+  //     if (result.recordset[0].data_venda) {
+  //       result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
+
+  //       res.json({ message: false, string: query, jsonRetorno: result.recordset });
+  //     } else {
+  //       res.json({ message: true, string: query, jsonRetorno: result.recordset });
+  //     }
+  //   } else {
+  //     res.json({ message: false, string: query, jsonRetorno: [] });
+  //   }
+  // });
 
 };
 exports.updateVenda = function (req, res) {
@@ -223,32 +232,52 @@ function updateComboFesta(id_festa, params, label) {
 
 exports.getLista = function (req, res) {
   var query = `select * from pca_festa_venda_aluno where id_festa = ${req.params.id_festa}`;
-  var conn = new sql.Request();
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
-    if (result.recordset.length > 0) {
-      res.json({ message: true, string: query, jsonRetorno: result.recordset });
-    } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
-    }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
+  // var conn = new sql.Request();
+  // conn.query(query, function (error, result) {
+  //   if (error) {
+  //     console.dir(error);
+  //   }
+  //   if (result.recordset.length > 0) {
+  //     res.json({ message: true, string: query, jsonRetorno: result.recordset });
+  //   } else {
+  //     res.json({ message: false, string: query, jsonRetorno: [] });
+  //   }
+  // });
 };
 exports.getFesta = function (req, res) {
   var query = "SELECT TOP 1 * FROM pca_festas_config ORDER BY id_festa DESC";
-  var conn = new sql.Request();
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
-    console.log(result)
-    if (result.recordset.length > 0) {
-      res.json({ message: true, string: query, jsonRetorno: result.recordset });
-    } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
-    }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
+  // var conn = new sql.Request();
+  // conn.query(query, function (error, result) {
+  //   if (error) {
+  //     console.dir(error);
+  //   }
+  //   console.log(result)
+  //   if (result.recordset.length > 0) {
+  //     res.json({ message: true, string: query, jsonRetorno: result.recordset });
+  //   } else {
+  //     res.json({ message: false, string: query, jsonRetorno: [] });
+  //   }
+  // });
 };
 exports.getComboLotes = function (req, res) {
   var query = "EXEC sp_pca_get_lote @ID=" + req.body.id_festa + "";
@@ -296,16 +325,15 @@ exports.gerarExcel = function (req, res) {
   var festa = req.params.id_festa != 'all' ? req.params.id_festa : null;
   var tipo = req.params.tipo != 'all' ? req.params.tipo : null;
   var query = " EXEC sp_pca_gera_excel " + "@ID_FESTA=" + festa + ",@TIPO=" + tipo + "";
-
-  var conn = new sql.Request();
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
+ 
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+      console.dir(err);
     }
 
-    if (result.recordset.length > 0) {
+    if (result.length > 0) {
 
-      var excel = result.recordset;
+      var excel = result;
       var body = "";
       excel.forEach(function (row) {
         body += "<tr>";
