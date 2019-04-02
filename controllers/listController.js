@@ -89,24 +89,35 @@ exports.updateVenda = function (req, res) {
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
   query += " ,@NINGRESSO='" + req.body.numeroIngresso + "'";
-  var conn = new sql.Request();
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
-    }
 
-    if (result.recordset.length > 0) {
-      if (result.recordset[0].data_venda) {
-        result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
-
-        res.json({ message: false, string: query, jsonRetorno: result.recordset });
-      } else {
-        res.json({ message: true, string: query, jsonRetorno: result.recordset });
-      }
-    } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
+  // var conn = new sql.Request();
+  // conn.query(query, function (error, result) {
+  //   if (error) {
+  //     console.dir(error);
+  //   }
+
+  //   if (result.recordset.length > 0) {
+  //     if (result.recordset[0].data_venda) {
+  //       result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
+
+  //       res.json({ message: false, string: query, jsonRetorno: result.recordset });
+  //     } else {
+  //       res.json({ message: true, string: query, jsonRetorno: result.recordset });
+  //     }
+  //   } else {
+  //     res.json({ message: false, string: query, jsonRetorno: [] });
+  //   }
+  // });
 };
 
 exports.detalhesConvidado = function(req, res) {
@@ -143,28 +154,38 @@ exports.updateVendaConvidado = function (req, res) {
   query += " ,@COMBO=" + req.body.combo + "";
   query += " ,@NINGRESSO='" + req.body.numeroIngresso + "'";
 
-  var conn = new sql.Request();
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
+  });
+  // var conn = new sql.Request();
+  // conn.query(query, function (error, result) {
+  //   if (error) {
+  //     console.dir(error);
+  //   }
 
     
-    if (result.recordset.length > 0) {
-      res.json({
-        message: false,
-        string: query,
-        jsonRetorno: result.recordset
-      });
-    } else {
-      res.json({
-        message: true,
-        string: query,
-        jsonRetorno: []
-      });
-    }
+  //   if (result.recordset.length > 0) {
+  //     res.json({
+  //       message: false,
+  //       string: query,
+  //       jsonRetorno: result.recordset
+  //     });
+  //   } else {
+  //     res.json({
+  //       message: true,
+  //       string: query,
+  //       jsonRetorno: []
+  //     });
+  //   }
     
-  });
+  // });
 
 };
 exports.updateFesta = function (req, res) {
