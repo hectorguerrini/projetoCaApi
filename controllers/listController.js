@@ -79,7 +79,7 @@ exports.updateVenda = function (req, res) {
   query += " ,@ID_FESTA=" + req.body.id_festa + "";
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
-  query += " ,@NINGRESSO=" + req.body.numeroIngresso + "";
+  query += " ,@NINGRESSO='" + req.body.numeroIngresso + "'";
   var conn = new sql.Request();
   conn.query(query, function (error, result) {
     if (error) {
@@ -132,7 +132,7 @@ exports.updateVendaConvidado = function (req, res) {
   query += " ,@ID_FESTA=" + req.body.id_festa + "";
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
-  query += " ,@NINGRESSO=" + req.body.numeroIngresso + "";
+  query += " ,@NINGRESSO='" + req.body.numeroIngresso + "'";
 
   var conn = new sql.Request();
   conn.query(query, function (error, result) {
@@ -221,8 +221,8 @@ function updateComboFesta(id_festa, params, label) {
 };
 
 
-exports.getListaFestas = function (req, res) {
-  var query = "SELECT * FROM pca_festas_config";
+exports.getLista = function (req, res) {
+  var query = `select * from pca_festa_venda_aluno where id_festa = ${req.body.id_festa}`;
   var conn = new sql.Request();
   conn.query(query, function (error, result) {
     if (error) {
@@ -317,6 +317,7 @@ exports.gerarExcel = function (req, res) {
         body += "<data>" + moment(row.data_venda).format('MM/DD/YYYY') + "</data>"
         body += "<alimento>" + row.alimento + "</alimento>"
         body += "<sexo>" + row.sexo + "</sexo>"
+        body += "<comboo>" + row.combo + "</combo>"
         body += "</tr>"
       })
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
