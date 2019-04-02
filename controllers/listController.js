@@ -4,7 +4,7 @@ var fs = require("fs");
 var path = require('path');
 //var sql = require('mssql')
 moment.locale("pt-br");
-const querySql = require('./mssqlConfig')();
+const querySql = require('../config')();
 
 // sql.connect(config, function (err) {
 //   if (err) {
