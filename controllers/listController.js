@@ -78,7 +78,8 @@ exports.updateVenda = function (req, res) {
   query += " ,@ALIMENTO=" + req.body.flag_alimento + "";
   query += " ,@ID_FESTA=" + req.body.id_festa + "";
   query += " ,@LOTE=" + req.body.lote + "";
-
+  query += " ,@COMBO=" + req.body.combo + "";
+  query += " ,@NINGRESSO=" + req.body.numeroIngresso + "";
   var conn = new sql.Request();
   conn.query(query, function (error, result) {
     if (error) {
@@ -130,6 +131,8 @@ exports.updateVendaConvidado = function (req, res) {
   query += " ,@ALIMENTO=" + req.body.flag_alimento + "";
   query += " ,@ID_FESTA=" + req.body.id_festa + "";
   query += " ,@LOTE=" + req.body.lote + "";
+  query += " ,@COMBO=" + req.body.combo + "";
+  query += " ,@NINGRESSO=" + req.body.numeroIngresso + "";
 
   var conn = new sql.Request();
   conn.query(query, function (error, result) {
@@ -137,17 +140,21 @@ exports.updateVendaConvidado = function (req, res) {
       console.dir(error);
     }
 
+    
     if (result.recordset.length > 0) {
-      if (result.recordset[0].data_venda) {
-        result.recordset[0].data_venda = moment(result.recordset[0].data_venda).format("LLL");
-
-        res.json({ message: false, string: query, jsonRetorno: result.recordset });
-      } else {
-        res.json({ message: true, string: query, jsonRetorno: result.recordset });
-      }
+      res.json({
+        message: false,
+        string: query,
+        jsonRetorno: result.recordset
+      });
     } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
+      res.json({
+        message: true,
+        string: query,
+        jsonRetorno: []
+      });
     }
+    
   });
 
 };
