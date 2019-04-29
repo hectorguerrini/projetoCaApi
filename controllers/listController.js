@@ -88,7 +88,7 @@ exports.updateVenda = function (req, res) {
   query += " ,@ID_FESTA=" + req.body.id_festa + "";
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
-  query += " ,@NINGRESSO='" + req.body.numeroIngresso + "'";
+  query += " ,@CAMAROTE=" + req.body.camarote + "";
 
   querySql.queryDB(query, (err, result) => {
     if (err) {
@@ -152,7 +152,7 @@ exports.updateVendaConvidado = function (req, res) {
   query += " ,@ID_FESTA=" + req.body.id_festa + "";
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
-  query += " ,@NINGRESSO='" + req.body.numeroIngresso + "'";
+  query += " ,@CAMAROTE=" + req.body.camarote + "";
 
   querySql.queryDB(query, (err, result) => {
     if (err) {
