@@ -366,9 +366,8 @@ exports.gerarExcel = function (req, res) {
         body += "<lote>" + row.lote + "</lote>"
         body += "<preco>" + row.preco + "</preco>"
         body += "<data>" + moment(row.data_venda).format('MM/DD/YYYY') + "</data>"
-        body += "<alimento>" + row.alimento + "</alimento>"
-        body += "<sexo>" + row.sexo + "</sexo>"
-        body += "<comboo>" + row.combo + "</combo>"
+        body += "<camarote>" + row.camarote + "</camarote>"
+        body += "<sexo>" + row.sexo + "</sexo>"        
         body += "</tr>"
       })
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
