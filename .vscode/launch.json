@@ -7,17 +7,8 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program List new",
-            "program": "${workspaceFolder}/controllers/listnew.js"
-        },
-        {
-            "type": "node",
-            "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}\\server.js",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            "program": "${workspaceFolder}/server.js"
         }
     ]
 }
