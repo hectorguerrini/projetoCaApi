@@ -278,7 +278,7 @@ exports.getLista = function (req, res) {
   // });
 };
 exports.getFesta = function (req, res) {
-  var query = "SELECT TOP 1 * FROM pca_festas_config ORDER BY id_festa DESC";
+  var query = `SELECT * FROM pca_festas_config WHERE id_festa = ${req.params.id} ORDER BY id_festa DESC`;
   querySql.queryDB(query, (err, result) => {
     if (err) {
         console.dir(err);
@@ -303,17 +303,16 @@ exports.getFesta = function (req, res) {
   // });
 };
 exports.getComboLotes = function (req, res) {
-  var query = "EXEC sp_pca_get_lote @ID=" + req.body.id_festa + "";
-  var conn = new sql.Request()
-  conn.query(query, function (error, result) {
-    if (error) {
-      console.dir(error);
+  var query = "EXEC sp_pca_get_lote @ID=" + req.params.id_festa + "";
+   querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
     }
-    if (result.recordset.length > 0) {
-      res.json({ message: true, string: query, jsonRetorno: result.recordset });
-    } else {
-      res.json({ message: false, string: query, jsonRetorno: [] });
-    }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
 };
 exports.updateBaseAlunos = function (req, res) {
@@ -366,9 +365,8 @@ exports.gerarExcel = function (req, res) {
         body += "<lote>" + row.lote + "</lote>"
         body += "<preco>" + row.preco + "</preco>"
         body += "<data>" + moment(row.data_venda).format('MM/DD/YYYY') + "</data>"
-        body += "<alimento>" + row.alimento + "</alimento>"
-        body += "<sexo>" + row.sexo + "</sexo>"
-        body += "<combo>" + row.combo + "</combo>"
+        body += "<camarote>" + row.camarote + "</camarote>"
+        body += "<sexo>" + row.sexo + "</sexo>"        
         body += "</tr>"
       })
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
@@ -414,5 +412,19 @@ exports.delete = function (req, res) {
     } else {
       res.json({ message: false, string: query, jsonRetorno: [] });
     }
+  });
+};
+
+exports.getListaFestas = function (req, res) {
+  var query = "EXEC sp_pca_get_lista_festas";
+  querySql.queryDB(query, (err, result) => {
+    if (err) {
+        console.dir(err);
+        return;
+    }
+    res.json({
+        query: query,
+        jsonRetorno: result
+    });
   });
 };

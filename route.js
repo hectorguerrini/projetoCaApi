@@ -23,11 +23,13 @@ module.exports = function(app) {
   
     app.route('/vendas/get_lista')
     .post(list.getLista);
+	app.route('/vendas/get_lista_festas')
+    .get(list.getListaFestas);
 
-  app.route('/vendas/get_festa')
-    .post(list.getFesta);
-  app.route('/vendas/get_lotes')
-    .post(list.getComboLotes);
+  app.route('/vendas/get_festa/:id')
+    .get(list.getFesta);
+  app.route('/vendas/get_lotes/:id_festa')
+    .get(list.getComboLotes);
   app.route('/vendas/excel/download/:id_festa/:tipo')
     .get(list.gerarExcel)
   app.route('/vendas/delVenda')

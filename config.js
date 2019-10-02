@@ -2,7 +2,7 @@ var sql = require('mssql')
 const config = {
     user: 'node',
     password: 'nodeadmin',
-    server: '192.168.15.3', // You can use 'localhost\\instance' to connect to named instance
+    server: '192.168.15.5', // You can use 'localhost\\instance' to connect to named instance
     database: 'DB01',
     pool: {
         max: 20,
