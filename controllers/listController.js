@@ -89,6 +89,7 @@ exports.updateVenda = function (req, res) {
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
   query += " ,@CAMAROTE=" + req.body.camarote + "";
+  query += " ,@INGRESSO=" + req.body.ingresso + "";
 
   querySql.queryDB(query, (err, result) => {
     if (err) {
@@ -153,7 +154,8 @@ exports.updateVendaConvidado = function (req, res) {
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
   query += " ,@CAMAROTE=" + req.body.camarote + "";
-
+  query += " ,@INGRESSO=" + req.body.ingresso + "";
+  
   querySql.queryDB(query, (err, result) => {
     if (err) {
         console.dir(err);
@@ -366,7 +368,8 @@ exports.gerarExcel = function (req, res) {
         body += "<preco>" + row.preco + "</preco>"
         body += "<data>" + moment(row.data_venda).format('MM/DD/YYYY') + "</data>"
         body += "<camarote>" + row.camarote + "</camarote>"
-        body += "<sexo>" + row.sexo + "</sexo>"        
+		body += "<sexo>" + row.sexo + "</sexo>"  
+		body += "<NumeroIngresso>" + row.ingresso + "</NumeroIngresso>"        
         body += "</tr>"
       })
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
