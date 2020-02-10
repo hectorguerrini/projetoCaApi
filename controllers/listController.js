@@ -375,22 +375,12 @@ exports.gerarExcel = function (req, res) {
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
       html = html + "<table><tbody>" + body + "</tbody></table>";
       console.log(html)
-      var save = fs.writeFile("vendas.xls", html, 'utf8', err => {
+      var save = fs.writeFile(`C:/inetpub/wwwroot/vendas/vendas_${festa}.xls`, html, 'utf8', err => {
         if (err) throw err;
         console.log("The file has been saved!");
-
-        var path = 'C:/inetpub/wwwroot/vendas/vendas.xls';
-        res.download(path, 'vendas.xls', function (err) {
-          if (err) {
-            console.log(err)
-          }
-
-          console.log('download path: ' + path)
-        })
       });
 
-
-
+	  res.json({ message: false, string: query, caminho: `C:/inetpub/wwwroot/arquivos/vendas_${festa}.xls` });
     } else {
       res.json({ message: false, string: query, caminho: '' });
     }
