@@ -374,13 +374,11 @@ exports.gerarExcel = function (req, res) {
       })
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
       html = html + "<table><tbody>" + body + "</tbody></table>";
-      console.log(html)
-      var save = fs.writeFile(`C:/inetpub/wwwroot/vendas/vendas_${festa}.xls`, html, 'utf8', err => {
-        if (err) throw err;
-        console.log("The file has been saved!");
-      });
-
-	  res.json({ message: false, string: query, caminho: `C:/inetpub/wwwroot/arquivos/vendas_${festa}.xls` });
+	  console.log(html)
+	  const path = `C:/inetpub/wwwroot/arquivos/vendas_${festa}.xls`;
+      
+	  fs.writeFileSync(path,html,'utf-8');
+	  res.json({ message: true, string: query, caminho: path });
     } else {
       res.json({ message: false, string: query, caminho: '' });
     }
