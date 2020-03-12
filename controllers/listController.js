@@ -89,7 +89,7 @@ exports.updateVenda = function (req, res) {
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
   query += " ,@CAMAROTE=" + req.body.camarote + "";
-  query += " ,@INGRESSO=" + req.body.ingresso + "";
+  query += " ,@FORMADO=" + req.body.formado + "";
 
   querySql.queryDB(query, (err, result) => {
     if (err) {
@@ -154,7 +154,7 @@ exports.updateVendaConvidado = function (req, res) {
   query += " ,@LOTE=" + req.body.lote + "";
   query += " ,@COMBO=" + req.body.combo + "";
   query += " ,@CAMAROTE=" + req.body.camarote + "";
-  query += " ,@INGRESSO=" + req.body.ingresso + "";
+  query += " ,@FORMADO=" + req.body.formado + "";
   
   querySql.queryDB(query, (err, result) => {
     if (err) {
@@ -369,7 +369,7 @@ exports.gerarExcel = function (req, res) {
         body += "<data>" + moment(row.data_venda).format('MM/DD/YYYY') + "</data>"
         body += "<camarote>" + row.camarote + "</camarote>"
 		body += "<sexo>" + row.sexo + "</sexo>"  
-		body += "<NumeroIngresso>" + row.ingresso + "</NumeroIngresso>"        
+		body += "<formando>" + row.formado + "</formando>"        
         body += "</tr>"
       })
       var html = "<?xml version='1.0' encoding='UTF-8'?>";
@@ -419,3 +419,54 @@ exports.getListaFestas = function (req, res) {
     });
   });
 };
+
+exports.getProdutos = function (req, res) {
+	var query = "SELECT * FROM pca_produtos_estoque";
+	querySql.queryDB(query, (err, result) => {
+	  if (err) {
+		  console.dir(err);
+		  return;
+	  }
+	  res.json({
+		  query: query,
+		  jsonRetorno: result
+	  });
+	});
+}
+exports.updateVendaProduto = function (req, res) {
+	let ret = [];
+	var query;	
+	req.body.forEach(el => {
+		query = `exec sp_pca_update_estoque @ID_PRODUTO = ${el.id_produto}, @QTDE = ${el.qtde}`;
+		querySql.queryDB(query, (err, result) => {
+			if (err) {
+				console.dir(err);
+				return;
+			}
+			ret.push(result);
+		});
+
+	})
+	
+	
+}
+exports.novoProduto = function (req, res) {
+	var query = `
+		EXEC sp_pca_update_produto
+		@ID_PRODUTO = ${req.body.id_produto ? req.body.id_produto : null },
+		@DESCRICAO = '${req.body.descricao}',
+		@QTDE = ${req.body.qtde}, 
+		@VALOR = ${req.body.valor},
+		@TAMANHO = '${req.body.tamanho}'
+	`;
+	querySql.queryDB(query, (err, result) => {
+	  if (err) {
+		  console.dir(err);
+		  return;
+	  }
+	  res.json({
+		  query: query,
+		  jsonRetorno: result
+	  });
+	});
+}
